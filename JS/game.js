@@ -1,6 +1,11 @@
+//Valores teclas
+var keyLeft = 37;
+    keyUp = 38;
+    keyRight = 39;
+    keyDown = 40;
+    keyEnter = 13;
 var canvas = null;
     ctx = null;
-    player = null;
     lastPress = null;
     food = null;
     pause = true;
@@ -8,13 +13,11 @@ var canvas = null;
     dir = 0;
     score = 0;
 var wall = new Array ();
-//Valores teclas
-var keyLeft = 37;
-    keyUp = 38;
-    keyRight = 39;
-    keyDown = 40;
-    keyEnter = 13;
-
+var body = new Array ();
+var iSnake = new Image ();
+var iFood = new Image ();
+var aEat = new Audio ();
+var aDie = new Audio ();
 window.requestAnimationFrame = (function(){
     return window.requestAnimationFrame ||
         window.mozRequestAnimationFrame ||
@@ -33,19 +36,18 @@ function paint (ctx){
     ctx.fillStyle='#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     //draw player
-    ctx.fillStyle = '#0f0';
-    player.fill(ctx);
+    for ( i = 0, l = body.length; i < l; i += 1){
+        ctx.drawImage(iSnake, body[i].x, body[i].y);
+    }
     //draw walls
     ctx.fillStyle = '#999';
     for ( i = 0, l = wall.length; i < l; i += 1){
         wall[i].fill(ctx);
     }
     //draw food
-    ctx.fillStyle = '#f00';
-    food.fill(ctx);
+    ctx.drawImage(iFood, food.x, food.y);
     //last key pressed
     ctx.fillStyle = '#fff';
-    //ctx.fillText('Las Press: '+lastPress, 0, 20);
     //draw score
     ctx.fillText('Score: '+score, 0,10);
     // pause
@@ -60,56 +62,55 @@ function paint (ctx){
     }
 }
 function act(){
-    var i;
-    var l;
+    var i = 0;
+    var l = 0;
     if(!pause){
         if(gameover){
             reset();
         }
+        //Move Body
+        for (i = body.length - 1; i > 0; i -= 1){
+            body[i].x = body[i - 1].x;
+            body[i].y = body[i - 1].y;
+        }
         //Change Direction
-        if (lastPress == keyUp){
+        if (lastPress == keyUp && dir != 2){
             dir = 0;
         }
-        if (lastPress == keyRight){
+        if (lastPress == keyRight && dir != 3){
             dir = 1;
         }
-        if (lastPress == keyDown){
+        if (lastPress == keyDown && dir != 0){
             dir = 2;
         }
-        if (lastPress == keyLeft){
+        if (lastPress == keyLeft && dir != 1){
             dir = 3;
         }
-        //Snake Movement
-        if (dir == 0){
-            player.y -= 10;
+        //Move Head
+        if(dir == 0){
+            body[0].y -= 10;
         }
-        if (dir == 1){
-            player.x += 10;
+        if(dir == 1){
+            body[0].x += 10;
         }
-        if (dir == 2){
-            player.y += 10;
+        if(dir == 2){
+            body[0].y += 10;
         }
-        if (dir == 3){
-            player.x -= 10;
+        if(dir == 3){
+            body[0].x -= 10;
         }
         //Snake OUT SCREEN
-        if ( player.x > canvas.width){
-            player.x = 0;
+        if ( body[0].x > canvas.width - body[0].width){
+            body[0].x = 0;
         }
-        if ( player.y > canvas.height){
-            player.y = 0;
+        if ( body[0].y > canvas.height - body[0].height){
+            body[0].y = 0;
         }
-        if ( player.x < 0){
-            player.x = canvas.width;
+        if ( body[0].x < 0){
+            body[0].x = canvas.width - body[0].width;
         }
-        if ( player.y < 0){
-            player.y = canvas.height;
-        }
-        //Food Intersects
-        if(player.intersects(food)){
-            score += 1;
-            food.x = random(canvas.width / 10-1) * 10;
-            food.y = random(canvas.height / 10 -1) * 10;
+        if ( body[0].y < 0){
+            body[0].y = canvas.height - body[0].height;
         }
         //Wall Intersects
         for (i = 0, l = wall.length; i < l; i += 1){
@@ -117,10 +118,27 @@ function act(){
                 food.x = random(canvas.width / 10 - 1) * 10;
                 food.y = random(canvas.height / 10 - 1) * 10;
             }
-            if (player.intersects(wall[i])){
+            if (body[0].intersects(wall[i])){
                 gameover = true;
                 pause = true;
+                aDie.play();
             }
+        }
+        //Body Intersects
+        for (i = 2, l = body.length; i < l; i += 1){
+            if(body[0].intersects(body[i])){
+                gameover = true;
+                pause = true;
+                aDie.play();
+            }
+        }
+        //Food Intersects
+        if(body[0].intersects(food)){
+            body.push (new Rectangle(food.x, food.y, 10, 10));
+            score += 1;
+            food.x = random(canvas.width / 10 - 1) * 10;
+            food.y = random(canvas.height / 10 - 1) * 10;
+            aEat.play();
         }
     }
     if(lastPress == keyEnter){
@@ -139,8 +157,13 @@ function run(){
 function init (){
     canvas= document.getElementById('canvas');
     ctx = canvas.getContext('2d');
-    player = new Rectangle(40, 40, 10, 10);
+    body[0] = new Rectangle(40, 40, 10, 10);
     food = new Rectangle(80, 80, 10, 10);
+    //load assets
+    iSnake.src = 'img/snake.png';
+    iFood.src = 'img/apple.png';
+    aEat.src = 'snd/check.oga.ogg';
+    aDie.src = 'snd/death.oga.ogg';
     //create walls
     wall.push(new Rectangle(100,50,10,10));
     wall.push(new Rectangle(100,100,10,10));
@@ -164,7 +187,7 @@ function Rectangle(x, y, width, height){
         }
     };
     this.fill = function (ctx){
-        if ( ctx == null){
+        if (ctx == null){
             window.console.warn ('Missing parameter on function fill');
         }
         else{
@@ -172,16 +195,18 @@ function Rectangle(x, y, width, height){
         }
     };
 }
+function random (max){
+    return Math.floor(Math.random() * max);
+}
 function reset (){
     score = 0;
     dir = 1;
-    player.x = 40;
-    player.y = 40;
+    body.length = 0;
+    body.push(new Rectangle(40,40,10,10));
+    body.push(new Rectangle(0,0,10,10));
+    body.push(new Rectangle(0,0,10,10));
     food.x = random(canvas.width / 10 - 1) * 10;
     food.y = random(canvas.height / 10 - 1) * 10;
     gameover = false;
-}
-function random (max){
-    return Math.floor(Math.random() * max);
 }
 window.addEventListener('load', init, false);
