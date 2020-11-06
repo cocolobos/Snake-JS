@@ -28,26 +28,23 @@ function paint (ctx){
     //clean Canvas
     ctx.fillStyle='#000';
     ctx.fillRect (0, 0, canvas.width, canvas.height);
-    //draw square
+    //draw player
     ctx.fillStyle = '#0f0';
-    ctx.fillRect (x, y, 10, 10);
+    player.fill(ctx);
+    //draw food
+    ctx.fillStyle = '#f00';
+    food.fill(ctx)
     //last key pressed
     ctx.fillStyle = '#fff';
     //ctx.fillText('Las Press: '+lastPress, 0, 20);
+    //draw score
+    ctx.fillText('Score: '+score, 0,10);
     // pause
     if (pause){
         ctx.textAlign = 'center';
         ctx.fillText('PAUSE', 150, 75);
         ctx.textAlign = 'left';
     }
-    //draw player
-    ctx.fillStyle = '#0f0';
-    player.fill(ctx);
-    //draw score
-    ctx.fillText('Score: '+score, 0,10);
-    //draw food
-    ctx.fillStyle = '#f00';
-    food.fill(ctx)
 }
 function act(){
     if(!pause){
@@ -69,26 +66,26 @@ function act(){
             player.y -= 10;
         }
         if (dir == 1){
-            playe.x += 10;
+            player.x += 10;
         }
         if (dir == 2){
-            playe.y += 10;
+            player.y += 10;
         }
         if (dir == 3){
-            playe.x -= 10;
+            player.x -= 10;
         }
         //Snake OUT SCREEN
-        if ( playe.x > canvas.width){
-            playe.x = 0;
+        if ( player.x > canvas.width){
+            player.x = 0;
         }
-        if ( playe.y > canvas.height){
-            playe.y = 0;
+        if ( player.y > canvas.height){
+            player.y = 0;
         }
-        if ( playe.x < 0){
-            playe.x = canvas.width;
+        if ( player.x < 0){
+            player.x = canvas.width;
         }
-        if ( playe.y < 0){
-            playe.y = canvas.height;
+        if ( player.y < 0){
+            player.y = canvas.height;
         }
         //Food Intersects
         if(player.intersects(food)){
