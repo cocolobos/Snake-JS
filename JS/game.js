@@ -52,14 +52,14 @@
     Rectangle.prototype = {
         constructor: Rectangle,
         intersects: function (rect) {
-        if (rect === undefined) {
-            window.console.warn('Missing parameters on function intersects');
-        } else {
-            return (this.x < rect.x + rect.width &&
-                this.x + this.width > rect.x &&
-                this.y < rect.y + rect.height &&
-                this.y + this.height > rect.y);
-        }
+            if (rect === undefined) {
+                window.console.warn('Missing parameters on function intersects');
+            } else {
+                return (this.x < rect.x + rect.width &&
+                    this.x + this.width > rect.x &&
+                    this.y < rect.y + rect.height &&
+                    this.y + this.height > rect.y);
+            }
         },
         fill: function (ctx) {
             if (ctx === undefined) {
@@ -132,7 +132,7 @@
         aDie.src = 'snd/death.oga.ogg';
         // Create food
         food = new Rectangle(80, 80, 10, 10);
-        special= new Rectangle(-10,-10,0,0);
+        special= new Rectangle(80,80,10,10);
         
         // Create walls
         wall.push(new Rectangle(50, 50, 10, 10));
@@ -145,6 +145,7 @@
         wall.push(new Rectangle(200, 100, 10, 10));
         wall.push(new Rectangle(250, 50, 10, 10));
         wall.push(new Rectangle(250, 100, 10, 10));
+        //Load Highscore
         if (localStorage.highscores) {
             highscores = localStorage.highscores.split(',');
         }
@@ -163,7 +164,7 @@
         ctx.textAlign = 'center';
         ctx.fillText('SNAKE', 150, 60);
         ctx.fillText('Press Enter', 150, 90);
-        };
+    };
     mainScene.act = function () {
         // Load next scene
         if (lastPress === KEY_ENTER) {
@@ -193,25 +194,22 @@
         // Draw player
         ctx.strokeStyle = '#0f0';
         for (i = 0, l = body.length; i < l; i += 1) {
-        body[i].drawImage(ctx, iBody);
+            body[i].drawImage(ctx, iBody);
         }
         // Draw walls
         ctx.fillStyle = '#f036';
         for (i = 0, l = wall.length; i < l; i += 1) {
-        wall[i].fill(ctx);
+            wall[i].fill(ctx);
         }
         // Draw food
         ctx.strokeStyle = '#f00';
         food.drawImage(ctx, iFood);
         // Draw Special Food
-        ctx.strokeStyle = '#f036'
         special.drawImage(ctx,iSpecial);
         // Draw score
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'left';
         ctx.fillText('Score: ' + score, 0, 10);
-        // Debug last key pressed
-        //ctx.fillText('Last Press: '+lastPress,0,20);
         // Draw pause
         if (pause) {
             ctx.textAlign = 'center';
