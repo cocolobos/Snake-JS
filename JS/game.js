@@ -282,16 +282,7 @@
                 aEat.play();
                 special.x = -10;
                 special.y = -10;
-                fetch("https://jsonplaceholder.typicode.com/todos/" + score)
-                    .then(function (response){
-                        return response.json();
-                    })
-                    .then(function(json){
-                        return console.log('Score sent successfully')
-                    })
-                    .catch(function (error){
-                        return console.log ('Error trying to send the score')
-                    });
+                postResult();
             }
             // Food Intersects
             if (body[0].intersects(food)) {
@@ -336,6 +327,19 @@
             lastPress = null;
         }
     };
+    function postResult (){
+        fetch("https://jsonplaceholder.typicode.com/todos/" + score)
+            .then(function (response){
+                return response.json();
+            })
+            .then(function(json){
+                return console.log('Score sent successfully')
+            })
+            .catch(function (error){
+                return console.log (`Error trying to send the score ${error}`)
+            }
+        );
+    }
     // Highscore Scene
     highscoresScene = new Scene();
     highscoresScene.paint = function (ctx) {
